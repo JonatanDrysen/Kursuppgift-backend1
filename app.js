@@ -1,37 +1,36 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const passport = require("passport")
+require("dotenv").config()
+const express = require("express")
 const session = require("express-session")
+const passport = require("passport")
+const mongoose = require("mongoose")
 const MongoStore = require("connect-mongo")
 
-const { redirect } = require("statuses");
+const { redirect } = require("statuses")
 const { User } = require("./models/user")
 
 const app = express()
+const PORT = 3000
+    // definierar känsliga .environment variabler från lokal .env fil 
+const MONGO_URL = process.env.MONGO_URL
+const SESSION_SECRET = process.env.SESSION_SECRET
 
     // skapar en säker autentiseringsstrategi för inloggning automatiskt m.hjälp av passport
 passport.use(User.createStrategy())
-
     // sparar användar-Id som en cookie i webbläsaren
 passport.serializeUser(User.serializeUser())
-
     // hämtar/laddar användar-Id från cookien som sen används för att hämta användarinfo etc
 passport.deserializeUser(User.deserializeUser())
-
     //parsar inkommande requests från servern, tillåter användning av POST requests
 app.use(express.urlencoded({extended: true}))
-
     // session middleware använder en "secret" för att på samma sätt som salt kryptera en sessionsnyckel
 app.use(session({
-    secret: "0+sdfn23324b99db32+pjncc",
+    secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: MONGO_URL })
 }))
-
     // passport.authenticate laddar användaren från sessionen, ger tillgången till ett användarobjekt
 app.use(passport.authenticate("session"))
-
-const PORT = 3000;
 
 app.get("/", (req, res) => {
     res.redirect("/login")
@@ -63,15 +62,16 @@ app.post("/login", passport.authenticate("local", {
 
 app.get("/home", (req, res) => {
     if (req.user) {
-        // rendera homePage.ejs och skicka med username i bodyn om man är inloggad
+            // rendera homePage.ejs och skicka med username i bodyn om man är inloggad
         res.render("homePage.ejs", {username: req.user.username})
+        console.log(req.user.username)
     } else {
         res.redirect("/login")
-        alert("These credentials don't match anything in our database, check inputs.")
+        window.alert("These credentials don't match anything in our database, check inputs.")
     }
 })
 
-mongoose.connect("mongodb://localhost/backend1")
+mongoose.connect(MONGO_URL)
 
 app.listen(PORT, () => {
   console.log(`Started Express server on port ${PORT}`);
