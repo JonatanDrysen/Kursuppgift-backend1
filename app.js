@@ -60,11 +60,15 @@ app.post("/login", passport.authenticate("local", {
    successRedirect: "/home"
 }))
 
+app.post("/logout", (req, res) => {
+    req.logout()
+    req.redirect("/login")
+})
+
 app.get("/home", (req, res) => {
     if (req.user) {
             // rendera homePage.ejs och skicka med username i bodyn om man är inloggad
         res.render("homePage.ejs", {username: req.user.username})
-        console.log(req.user.username)
     } else {
         res.redirect("/login")
         window.alert("These credentials don't match anything in our database, check inputs.")
