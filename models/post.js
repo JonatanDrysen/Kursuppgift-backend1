@@ -7,6 +7,6 @@ const postSchema = new mongoose.Schema({
     postTime: {type: Date, default: Date.now}
 })
 
-const newPost = mongoose.model("newPost", postSchema)
+const Post = mongoose.model("Post", postSchema)
 
-exports.newPost = newPost
+exports.Post = Post

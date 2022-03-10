@@ -8,6 +8,20 @@
     <body>
         <h1>Hey baby <%= username %> yeah</h1>
 
-        <a href="/login">Log out</a>
+        <form action="/home" method="post">
+            Title: <input type="text" name="title" /></br/>
+            Content: <textarea name="content" cols="30" rows="10"></textarea>
+            <input type="submit" value="Post!">
+        </form>
+
+        <% posts.forEach(post => {  %> 
+            <div class="post">
+                <h3> <%= post.title %> </h3>
+                <p> <%= post.postTime %> </p>
+                <p> <%= post.content %> </p>
+            </div>
+       <% }) %>
+
+        <a href="/logout">Log out</a>
     </body>
 </html>
