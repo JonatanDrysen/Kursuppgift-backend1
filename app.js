@@ -59,17 +59,20 @@ app.get("/login", (req, res) => {
 app.post("/login", passport.authenticate("local", {
         // Passport gör en inloggningsstrategi med hjälp av middleware:en & passport.authenticate för att 
         // logga in användaren och peka dem till "/" on success
-   successRedirect: "/"
+   successRedirect: "/",
+   failureRedirect: "/login",
 }))
 
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
     req.logout()
     res.redirect("/login")
 })
 
 app.get("/", async (req, res) => {
-    const posts = await Post.find({user: req.user._id});
-    res.render("homePage.ejs", {posts}) 
+    const posts = await Post.find({}).populate("user").sort({postTime: -1})
+    const user = new User({})
+    res.render("homePage.ejs", {user, posts})
+
 })
 
 app.use(ensureLoggedIn("/login"))
