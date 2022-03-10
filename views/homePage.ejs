@@ -6,22 +6,21 @@
     </head>
 
     <body>
-        <h1>whats up <%= user.username %> </h1>
         
-        
+        <a href="/logout">Log out</a> <hr/>
 
         <form action="/" method="post">
             Title: <input type="text" name="title" /></br/>
-            Content: <textarea name="content" cols="30" rows="10" maxlength="140"></textarea>
+            Content: <textarea name="content" cols="30" rows="5" maxlength="140"></textarea>
             <input type="submit" value="Post!">
         </form>
 
         <% posts.forEach(post => {  %> 
             <div class="post">
-                <h3> <%= user.username %> </h3>
+                <h3> <%= post.user.username %> </h3>
                 <h4> <%= post.title %> </h4>
-                <p> <%= post.postTime %> </p>
                 <p> <%= post.content %> </p>
+                <p> <%= post.postTime %> </p>
                 <hr/>
             </div>
        <% }) %>

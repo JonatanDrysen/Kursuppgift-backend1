@@ -7,4 +7,6 @@ const userSchema = new mongoose.Schema({
 
 userSchema.plugin(plm)
 
-exports.User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema)
+
+exports.User = User

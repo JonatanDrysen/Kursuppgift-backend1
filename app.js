@@ -70,19 +70,21 @@ app.get("/logout", (req, res) => {
 
 app.get("/", async (req, res) => {
     const posts = await Post.find({}).populate("user").sort({postTime: -1})
-    const user = new User({})
-    res.render("homePage.ejs", {user, posts})
-
+    res.render("homePage.ejs", {posts})
 })
 
 app.use(ensureLoggedIn("/login"))
 
 app.post("/", async (req, res) => {
     const { title, content } = req.body
-    const user = req.user
-    const post = new Post({ title, content, user: user._id })
+    const post = new Post({ 
+        title,
+        content,
+        user: req.user
+    })
     await post.save()
     res.redirect("/")
+    console.log(req.body)
 })
 
 mongoose.connect(MONGO_URL)
