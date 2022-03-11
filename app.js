@@ -63,18 +63,24 @@ app.post("/login", passport.authenticate("local", {
    failureRedirect: "/login",
 }))
 
+    // kallar logout() funktionen som raderar sessionen när man klickar på en länk med path till "/logout"
 app.get("/logout", (req, res) => {
     req.logout()
     res.redirect("/login")
 })
 
+    // sparar modellen Post som "joinas" med User m.h.a .populate, sorterar posts nyast först,
+    // renderar homePage och skickar med posts för att kunna ladda in posts, username osv
 app.get("/", async (req, res) => {
     const posts = await Post.find({}).populate("user").sort({postTime: -1})
     res.render("homePage.ejs", {posts})
 })
 
+    // om man försöker accessa paths under denhär försäkrar den sig att man är inloggad,
+    // annars blir man pekad till login
 app.use(ensureLoggedIn("/login"))
 
+    // gör en ny Post instans med nödvändiga parametrar och sparar ner den i databasen under posts
 app.post("/", async (req, res) => {
     const { title, content } = req.body
     const post = new Post({ 
@@ -84,7 +90,7 @@ app.post("/", async (req, res) => {
     })
     await post.save()
     res.redirect("/")
-    console.log(req.body)
+    //console.log(req.body)
 })
 
 mongoose.connect(MONGO_URL)
