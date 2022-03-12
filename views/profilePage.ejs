@@ -2,19 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Twitter yeah baby</title>
+        <title>twitter yeah baby</title>
     </head>
 
     <body>
-        
-        <a href="/logout">Log out</a>
-        <a href="/mypage">Your page</a> <hr/>
-
-        <form action="/" method="post">
-            Title: <input type="text" name="title" /></br/>
-            Content: <textarea name="content" cols="50" rows="2" maxlength="140"></textarea>
-            <input type="submit" value="Post!">
-        </form>
+        <a href="/">Home</a>
+        <h1> <img src="<%= user.profilePicture %>" height="150" width="150"/> <%= user.username %> </h1> <hr />
 
         <% posts.forEach(post => {  %> 
             <div class="post">
@@ -25,6 +18,5 @@
                 <hr/>
             </div>
        <% }) %>
-
     </body>
 </html>

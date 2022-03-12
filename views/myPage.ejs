@@ -6,8 +6,20 @@
     </head>
 
     <body>
-        <h1>My Page baby yeah</h1>
-
         <a href="/logout">Log out</a>
+        <a href="/">Home</a>
+        <h1>Logged in as <%= user.username %></h1>
+        <img src="<%= user.profilePicture %>" alt="profile picture" height="150" width="150"> <br />
+
+
+        <!-- kollar om man har lagt in rätt filtyp, om inte kastar den ett err i "msg" -->
+        <%= typeof msg != "undefined" ? msg : "" %>
+
+        <form action="/mypage" method="post" enctype="multipart/form-data">
+            Change profile picture: <input type="file" name="profilePicture" /> <br />
+            Change your name: <input type="text" name="fullName" /> <br />
+            Change your E-Mail: <input type="text" name="email" /> <br />
+            <input type="submit" value="Update profile!">
+        </form>
     </body>
 </html>

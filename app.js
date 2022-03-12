@@ -1,6 +1,9 @@
 require("dotenv").config()
 const express = require("express")
 const session = require("express-session")
+const multer = require("multer")
+const path = require("path")
+
 const passport = require("passport")
 const mongoose = require("mongoose")
 const MongoStore = require("connect-mongo")
@@ -18,6 +21,8 @@ const SESSION_SECRET = process.env.SESSION_SECRET
 
     //parsar inkommande requests från servern, tillåter användning av POST requests
 app.use(express.urlencoded({extended: true}))
+    // gör uploads till en static folder
+app.use(express.static("./uploads"))
     // skapar en säker autentiseringsstrategi för inloggning automatiskt m.hjälp av passport
 passport.use(User.createStrategy())
     // sparar användar-Id som en cookie i webbläsaren
@@ -33,6 +38,23 @@ app.use(session({
 }))
     // passport.authenticate laddar användaren från sessionen, ger tillgången till ett användarobjekt
 app.use(passport.authenticate("session"))
+
+
+    // sätt storage engine för hur bilder sak sparas
+const storage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, "./uploads/images/")
+    },
+    filename: (req, file, callback) => {
+        console.log(req.user)
+        callback(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
+    }
+})
+    // använd storage engine
+const upload = multer({ 
+    storage: storage,
+    limits: {fileSize: 2000000}
+}).single("profilePicture")
 
 
 
@@ -56,6 +78,7 @@ app.post("/signup", async (req, res) => {
 app.get("/login", (req, res) => {
   res.render("loginPage.ejs");
 });
+
 app.post("/login", passport.authenticate("local", {
         // Passport gör en inloggningsstrategi med hjälp av middleware:en & passport.authenticate för att 
         // logga in användaren och peka dem till "/" on success
@@ -90,7 +113,46 @@ app.post("/", async (req, res) => {
     })
     await post.save()
     res.redirect("/")
-    //console.log(req.body)
+})
+
+app.get("/mypage", (req, res) => {
+    const user = req.user
+    res.render("myPage.ejs", {user})
+})
+
+app.post("/mypage", (req, res) => {
+    upload(req, res, async (err) => {
+        if(err) {
+            res.render("myPage.ejs", {
+                msg: `Error: ${err}`,
+                user: req.user
+            })
+        } else {
+            if(req.file == undefined) {
+                res.render("myPage.ejs", {
+                    msg: "Error: Please select a file!",
+                    user: req.user
+                })
+            } else {
+                const user = await User.findOne({_id: req.user._id})
+                user.profilePicture = `/images/${req.file.filename}`
+                await user.save()
+                res.render("myPage.ejs", {
+                    msg: "File uploaded!",
+                    user: req.user
+                    
+                })
+            }
+            
+        }
+    })
+})
+
+
+app.get("/users/:username", async (req, res) => {
+    const user = await User.findOne({username: req.params.username})
+    const posts = await Post.find({username: req.params.username}).populate("user").sort({postTime: -1})
+    res.render("profilePage.ejs", {posts, user})
 })
 
 mongoose.connect(MONGO_URL)
