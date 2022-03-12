@@ -17,8 +17,13 @@
         </form>
 
         <% posts.forEach(post => {  %> 
-            <div class="post">
-                <h3> <a href="/users/<%= post.user.username %>"> <img src="<%= post.user.profilePicture %>" height="40" width="40" /> <%= post.user.username %> </a> </h3>
+            <div>
+                <h3> 
+                    <a href="/users/<%= post.user.username %>">
+                        <img src="<%= post.user.profilePicture %>" height="40" width="40" />
+                        <%= post.user.username %>
+                    </a>
+                </h3>
                 <h4> <%= post.title %> </h4>
                 <p> <%= post.content %> </p>
                 <p> <%= post.postTime %> </p>

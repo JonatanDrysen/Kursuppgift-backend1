@@ -99,6 +99,12 @@ app.get("/", async (req, res) => {
     res.render("homePage.ejs", {posts})
 })
 
+app.get("/users/:username", async (req, res) => {
+    const user = await User.findOne({username: req.params.username})
+    const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
+    res.render("profilePage.ejs", {posts, user})
+})
+
     // om man försöker accessa paths under denhär försäkrar den sig att man är inloggad,
     // annars blir man pekad till login
 app.use(ensureLoggedIn("/login"))
@@ -115,9 +121,10 @@ app.post("/", async (req, res) => {
     res.redirect("/")
 })
 
-app.get("/mypage", (req, res) => {
+app.get("/mypage", async (req, res) => {
     const user = req.user
-    res.render("myPage.ejs", {user})
+    const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
+    res.render("myPage.ejs", {user, posts})
 })
 
 app.post("/mypage", (req, res) => {
@@ -148,12 +155,6 @@ app.post("/mypage", (req, res) => {
     })
 })
 
-
-app.get("/users/:username", async (req, res) => {
-    const user = await User.findOne({username: req.params.username})
-    const posts = await Post.find({username: req.params.username}).populate("user").sort({postTime: -1})
-    res.render("profilePage.ejs", {posts, user})
-})
 
 mongoose.connect(MONGO_URL)
 

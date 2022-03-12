@@ -20,6 +20,19 @@
             Change your name: <input type="text" name="fullName" /> <br />
             Change your E-Mail: <input type="text" name="email" /> <br />
             <input type="submit" value="Update profile!">
-        </form>
+        </form> <hr />
+
+        <% posts.forEach(post => {  %> 
+            <div>
+                <h3> 
+                    <img src="<%= post.user.profilePicture %>" height="40" width="40" />
+                    <%= post.user.username %>
+                </h3>
+                <h4> <%= post.title %> </h4>
+                <p> <%= post.content %> </p>
+                <p> <%= post.postTime %> </p>
+                <hr/>
+            </div>
+       <% }) %>
     </body>
 </html>
