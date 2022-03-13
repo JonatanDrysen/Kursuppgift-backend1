@@ -42,11 +42,10 @@ app.use(passport.authenticate("session"))
 
     // sätt storage engine för hur bilder sak sparas
 const storage = multer.diskStorage({
-    destination: (req, file, callback) => {
+    destination: (_req, _file, callback) => {
         callback(null, "./uploads/images/")
     },
     filename: (req, file, callback) => {
-        console.log(req.user)
         callback(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
     }
 })
@@ -99,6 +98,7 @@ app.get("/", async (req, res) => {
     res.render("homePage.ejs", {posts})
 })
 
+
 app.get("/users/:username", async (req, res) => {
     const user = await User.findOne({username: req.params.username})
     const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
@@ -135,22 +135,35 @@ app.post("/mypage", (req, res) => {
                 user: req.user
             })
         } else {
-            if(req.file == undefined) {
-                res.render("myPage.ejs", {
-                    msg: "Error: Please select a file!",
-                    user: req.user
-                })
-            } else {
-                const user = await User.findOne({_id: req.user._id})
-                user.profilePicture = `/images/${req.file.filename}`
-                await user.save()
-                res.render("myPage.ejs", {
-                    msg: "File uploaded!",
-                    user: req.user
-                    
-                })
-            }
-            
+            const user = await User.findOne({_id: req.user._id})
+            const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
+            user.profilePicture = `/images/${req.file.filename}`
+            await user.save()
+            res.render("myPage.ejs", {
+                msg: "Profile picture updated!",
+                user: req.user,
+                posts
+            })
+        }
+    })
+
+    upload(req, res, async (err) => {
+        if(err) {
+            res.render("myPage.ejs", {
+                msg: `Error: ${err}`,
+                user: req.user
+            })
+        } else {
+            const user = await User.findOne({_id: req.user._id})
+            const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
+            user.fullName = User.fullName
+            user.email = User.email
+            await user.save()
+            res.render("myPage.ejs", {
+                msg: "Profile info updated!",
+                user: req.user,
+                posts
+            })
         }
     })
 })

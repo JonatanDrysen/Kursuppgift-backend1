@@ -17,9 +17,13 @@
 
         <form action="/mypage" method="post" enctype="multipart/form-data">
             Change profile picture: <input type="file" name="profilePicture" /> <br />
-            Change your name: <input type="text" name="fullName" /> <br />
-            Change your E-Mail: <input type="text" name="email" /> <br />
-            <input type="submit" value="Update profile!">
+            <input type="submit" value="Update profile picture!">
+        </form> <br /> 
+        
+        <form action="/mypage" method="post">
+            Change your name:   <input type="text" name="fullName" placeholder="John Doe"/> <br />
+            Change your E-Mail: <input type="text" name="email" placeholder="johndoe@gmail.com"/> <br />
+            <input type="submit" value="Update profile info!">
         </form> <hr />
 
         <% posts.forEach(post => {  %> 
