@@ -45,7 +45,7 @@ const storage = multer.diskStorage({
     destination: (_req, _file, callback) => {
         callback(null, "./uploads/images/")
     },
-    filename: (req, file, callback) => {
+    filename: (_req, file, callback) => {
         callback(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
     }
 })
@@ -58,7 +58,7 @@ const upload = multer({
 
 
 
-app.get("/signup", (req, res) => {
+app.get("/signup", (_req, res) => {
     res.render("signupPage.ejs");
 });
 
@@ -74,13 +74,13 @@ app.post("/signup", async (req, res) => {
     res.redirect("/login")
 })
 
-app.get("/login", (req, res) => {
+app.get("/login", (_req, res) => {
   res.render("loginPage.ejs");
 });
 
+    // Passport gör en inloggningsstrategi med hjälp av middleware:en & passport.authenticate för att 
+    // logga in användaren och peka dem till "/" on success
 app.post("/login", passport.authenticate("local", {
-        // Passport gör en inloggningsstrategi med hjälp av middleware:en & passport.authenticate för att 
-        // logga in användaren och peka dem till "/" on success
    successRedirect: "/",
    failureRedirect: "/login",
 }))
@@ -98,7 +98,9 @@ app.get("/", async (req, res) => {
     res.render("homePage.ejs", {posts})
 })
 
-    // renderar ut profilsidan för andra användare, tar in user & posts för att hitta och rendera data i mongo
+    // renderar ut profilsidan för andra användare.
+    // user hämtas ut genom att hitta 1 användare som matchar med username i URL:et (params)
+    // posts hämtas genom att hitta alla posts med korrekt user._id, joinas samman med "user", sorteras
 app.get("/users/:username", async (req, res) => {
     const user = await User.findOne({username: req.params.username})
     const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
@@ -109,7 +111,9 @@ app.get("/users/:username", async (req, res) => {
     // annars blir man pekad till login
 app.use(ensureLoggedIn("/login"))
 
-    // gör en ny Post instans med nödvändiga parametrar och sparar ner den i databasen under posts
+    // för att göra ett inlägg hämtas title, content ur request body:n,
+    // man gör en "post" av title, content, req.user som innehåller tex username & PFP,
+    // för att sedan spara denna nya post till mongo, och peka om användaren till "/" som laddar om alla inlägg igen
 app.post("/", async (req, res) => {
     const { title, content } = req.body
     const post = new Post({ 
@@ -121,14 +125,18 @@ app.post("/", async (req, res) => {
     res.redirect("/")
 })
 
-    // hämtar mypage och tar in user & posts för att kunna rendera ut användarens parametrar och inlägg
+    // Tar in user & posts för att kunna rendera ut inloggade användarens inlägg,
+    // renderar ut mypage och skickar med "user" & "posts" till ejs templaten
 app.get("/mypage", async (req, res) => {
     const user = req.user
     const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
     res.render("myPage.ejs", {user, posts})
 })
 
-    // laddar upp profilbild, namn, email och sparar nya värden till DB, omdirigerar sen till .get(/mypage)
+    // använder "upload" metoden för att ladda upp profilbild, namn, email genom att 
+    // först hantera ev fel, sedan skapa en "user" instans som innehåller inloggade användarens _id.
+    // Sedan skickar in eventuell profilbild, namn & email för att sen spara användaren med uppdaterad info,
+    // peka användaren till "/mypage" som sedan laddar om sidan med uppdaterad info.
 app.post("/mypage", (req, res) => {
     upload(req, res, async (err) => {
         if(err) {
@@ -149,8 +157,10 @@ app.post("/mypage", (req, res) => {
     })
 })
 
+    // initierar koppling till databas
 mongoose.connect(MONGO_URL)
 
+    // lyssnar efter koppling till databas
 app.listen(PORT, () => {
   console.log(`Started Express server on port ${PORT}`);
 });
