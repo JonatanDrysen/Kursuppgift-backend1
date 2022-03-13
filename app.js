@@ -98,7 +98,7 @@ app.get("/", async (req, res) => {
     res.render("homePage.ejs", {posts})
 })
 
-
+    // renderar ut profilsidan för andra användare, tar in user & posts för att hitta och rendera data i mongo
 app.get("/users/:username", async (req, res) => {
     const user = await User.findOne({username: req.params.username})
     const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
@@ -121,12 +121,14 @@ app.post("/", async (req, res) => {
     res.redirect("/")
 })
 
+    // hämtar mypage och tar in user & posts för att kunna rendera ut användarens parametrar och inlägg
 app.get("/mypage", async (req, res) => {
     const user = req.user
     const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
     res.render("myPage.ejs", {user, posts})
 })
 
+    // laddar upp profilbild, namn, email och sparar nya värden till DB, omdirigerar sen till .get(/mypage)
 app.post("/mypage", (req, res) => {
     upload(req, res, async (err) => {
         if(err) {
@@ -135,7 +137,6 @@ app.post("/mypage", (req, res) => {
                 user: req.user
             })
         } else {
-            console.log(req.body)
             const user = await User.findOne({_id: req.user._id})
             if(req.file) {
                 user.profilePicture = `/images/${req.file.filename}`
