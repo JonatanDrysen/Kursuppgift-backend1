@@ -135,39 +135,18 @@ app.post("/mypage", (req, res) => {
                 user: req.user
             })
         } else {
+            console.log(req.body)
             const user = await User.findOne({_id: req.user._id})
-            const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
-            user.profilePicture = `/images/${req.file.filename}`
+            if(req.file) {
+                user.profilePicture = `/images/${req.file.filename}`
+            }
+            user.fullName = req.body.fullName
+            user.email = req.body.email
             await user.save()
-            res.render("myPage.ejs", {
-                msg: "Profile picture updated!",
-                user: req.user,
-                posts
-            })
-        }
-    })
-
-    upload(req, res, async (err) => {
-        if(err) {
-            res.render("myPage.ejs", {
-                msg: `Error: ${err}`,
-                user: req.user
-            })
-        } else {
-            const user = await User.findOne({_id: req.user._id})
-            const posts = await Post.find({user: user._id}).populate("user").sort({postTime: -1})
-            user.fullName = User.fullName
-            user.email = User.email
-            await user.save()
-            res.render("myPage.ejs", {
-                msg: "Profile info updated!",
-                user: req.user,
-                posts
-            })
+            res.redirect("/mypage")
         }
     })
 })
-
 
 mongoose.connect(MONGO_URL)
 
